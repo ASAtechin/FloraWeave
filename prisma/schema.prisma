@@ -1,0 +1,510 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  ARTISAN
+  CREATOR
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  HANDCRAFTING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum FulfillmentStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}
+
+enum ModerationState {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+enum Tier {
+  SILVER
+  GOLD
+  ZODIAC_ELITE
+}
+
+model User {
+  id            String         @id @default(uuid()) @map("_id")
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(CUSTOMER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  profile       Profile?
+  artisanProfile ArtisanProfile?
+  creatorProfile CreatorProfile?
+  loyaltyWallet LoyaltyWallet?
+  referralsMade ReferralAttribution[] @relation("Referrer")
+  referralCode  ReferralCode?
+  orders        Order[]
+  reviews       Review[]
+  sessions      RecommendationSession[]
+  arSessions    ARSession[]
+  abAssignments ExperimentAssignment[]
+  auditLogs     AuditLog[]
+  securityEvents SecurityEvent[]
+  subscriptions SubscriptionLifecycle[]
+  savedDesigns  SavedDesign[]
+  wishlists     Wishlist[]
+}
+
+model Profile {
+  id          String   @id @default(uuid()) @map("_id")
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName   String?
+  lastName    String?
+  avatarUrl   String?
+  bio         String?
+  phoneNumber String?
+  gender      String?
+  birthDate   DateTime?
+  zodiacSign  String?
+  birthFlower String?
+  currency    String   @default("INR")
+  language    String   @default("en")
+  metadata    Json?    // For custom preferences
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid()) @map("_id")
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id                 String               @id @default(uuid()) @map("_id")
+  title              String
+  slug               String               @unique
+  description        String
+  price              Float
+  imageUrl           String
+  galleryUrls        String[]
+  rating             Float                @default(0.0)
+  reviewCount        Int                  @default(0)
+  categoryId         String
+  category           Category             @relation(fields: [categoryId], references: [id])
+  artisanId          String?
+  artisan            ArtisanProfile?      @relation(fields: [artisanId], references: [id])
+  isFestiveDrop      Boolean              @default(false)
+  isSubscriptionBox  Boolean              @default(false)
+  isFeatured         Boolean              @default(false)
+  isActive           Boolean              @default(true)
+  isDummy            Boolean              @default(false)
+  customizationConfig Json                 // Rules, options, materials, pricing formulas
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  variants           ProductVariant[]
+  orderItems         OrderItem[]
+  reviews            Review[]
+  zodiacMappings     ZodiacMapping[]
+  birthFlowerMappings BirthFlowerMapping[]
+  creatorCampaigns   CreatorCampaignProduct[]
+  subscriptionPlans  SubscriptionPlanProduct[]
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid()) @map("_id")
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku        String   @unique
+  title      String   // E.g. "Silver / Size M"
+  price      Float
+  stock      Int      @default(0)
+  meta       Json?    // metalFinish, size, fit details
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ZodiacMapping {
+  id          String   @id @default(uuid()) @map("_id")
+  zodiacSign  String   // Aries, Taurus, etc.
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  storyText   String?  // Rich astrological context for product compatibility
+  createdAt   DateTime @default(now())
+
+  @@unique([zodiacSign, productId])
+}
+
+model BirthFlowerMapping {
+  id          String   @id @default(uuid()) @map("_id")
+  birthFlower String   // Carnation, Violet, etc.
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  storyText   String?
+  createdAt   DateTime @default(now())
+
+  @@unique([birthFlower, productId])
+}
+
+model Cart {
+  id          String     @id @default(uuid()) @map("_id")
+  userId      String?    @unique
+  sessionId   String     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       CartItem[]
+}
+
+model CartItem {
+  id                 String   @id @default(uuid()) @map("_id")
+  cartId             String
+  cart               Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId          String
+  variantId          String?
+  quantity           Int      @default(1)
+  customizationData  Json?    // Selected zodiac, birthflower, engravings, metals, packaging
+  priceAtAddition    Float
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Order {
+  id                 String             @id @default(uuid()) @map("_id")
+  userId             String?
+  user               User?              @relation(fields: [userId], references: [id])
+  status             OrderStatus        @default(PENDING)
+  currency           String             @default("INR")
+  subtotal           Float
+  discount           Float              @default(0.0)
+  tax                Float              @default(0.0)
+  shippingFee        Float              @default(0.0)
+  loyaltyDiscount    Float              @default(0.0)
+  total              Float
+  pointsEarned       Int                @default(0)
+  pointsRedeemed     Int                @default(0)
+  shippingAddress    Json
+  billingAddress     Json
+  contactPhone       String
+  contactEmail       String
+  paymentIntentId    String?            @unique
+  paymentStatus      String             @default("UNPAID")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  items              OrderItem[]
+  fulfillmentOrders  VendorFulfillment[]
+  referralAttribution ReferralAttribution?
+}
+
+model OrderItem {
+  id                String             @id @default(uuid()) @map("_id")
+  orderId           String
+  order             Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product            @relation(fields: [productId], references: [id])
+  variantId         String?
+  quantity          Int
+  price             Float
+  customizationData Json?              // Captured zodiac, engraving, etc.
+  fulfillmentStatus FulfillmentStatus  @default(PENDING)
+  artisanId         String?
+  artisan           ArtisanProfile?    @relation(fields: [artisanId], references: [id])
+  createdAt         DateTime           @default(now())
+}
+
+model VendorFulfillment {
+  id                String             @id @default(uuid()) @map("_id")
+  orderId           String
+  order             Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  artisanId         String
+  artisan           ArtisanProfile     @relation(fields: [artisanId], references: [id])
+  status            FulfillmentStatus  @default(PENDING)
+  trackingNumber    String?
+  carrier           String?
+  estimatedDelivery DateTime?
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Review {
+  id              String          @id @default(uuid()) @map("_id")
+  productId       String
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating          Int
+  title           String?
+  body            String
+  images          String[]
+  moderationState ModerationState @default(PENDING)
+  moderatorNotes  String?
+  customizationSummary String?    // Tells what engraving, etc., the user bought
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([productId, userId])
+}
+
+model LoyaltyWallet {
+  id         String          @id @default(uuid()) @map("_id")
+  userId     String          @unique
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points     Int             @default(0)
+  tier       Tier            @default(SILVER)
+  updatedAt  DateTime        @updatedAt
+  ledgers    LoyaltyLedger[]
+}
+
+model LoyaltyLedger {
+  id          String        @id @default(uuid()) @map("_id")
+  walletId    String
+  wallet      LoyaltyWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  points      Int           // Positive or negative
+  reason      String        // E.g. SIGNUP, PURCHASE, REFERRAL, REDEEM
+  metadata    Json?         // E.g. Order ID
+  createdAt   DateTime      @default(now())
+}
+
+model ReferralCode {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ReferralAttribution {
+  id          String   @id @default(uuid()) @map("_id")
+  referrerId  String
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
+  refereeEmail String   @unique // To check uniqueness for referral rewards
+  orderId     String?  @unique
+  order       Order?   @relation(fields: [orderId], references: [id])
+  pointsGiven Int      @default(0)
+  status      String   @default("PENDING") // PENDING, REWARDED, INVALID
+  createdAt   DateTime @default(now())
+}
+
+model RecommendationSession {
+  id             String                  @id @default(uuid()) @map("_id")
+  userId         String?
+  user           User?                   @relation(fields: [userId], references: [id])
+  inputs         Json                    // zodiac, recipient profile, occasion, budget, etc.
+  createdAt      DateTime                @default(now())
+  outcomes       RecommendationOutcome[]
+}
+
+model RecommendationOutcome {
+  id                 String                @id @default(uuid()) @map("_id")
+  sessionId          String
+  session            RecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  productId          String
+  recoReason         String?               // Explainability text
+  accepted           Boolean               @default(false)
+  converted          Boolean               @default(false) // Purchased the item
+  createdAt          DateTime              @default(now())
+}
+
+model ArtisanProfile {
+  id                 String               @id @default(uuid()) @map("_id")
+  userId             String               @unique
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeName          String               @unique
+  storeSlug          String               @unique
+  bio                String?
+  avatarUrl          String?
+  commissionRate     Float                @default(0.10) // Custom artisan commission rate
+  verificationStatus String               @default("PENDING") // PENDING, APPROVED, REJECTED
+  complianceMetadata Json?                // VAT, KYC docs, address
+  qualityScore       Float                @default(5.0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  products           Product[]
+  orderItems         OrderItem[]
+  fulfillments       VendorFulfillment[]
+}
+
+model CreatorProfile {
+  id             String            @id @default(uuid()) @map("_id")
+  userId         String            @unique
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handle         String            @unique
+  displayName    String
+  bio            String?
+  avatarUrl      String?
+  commissionRate Float             @default(0.05)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  campaigns      CreatorCampaign[]
+}
+
+model CreatorCampaign {
+  id             String                   @id @default(uuid()) @map("_id")
+  creatorId      String
+  creator        CreatorProfile           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String                   @unique
+  description    String?
+  bannerUrl      String?
+  isActive       Boolean                  @default(true)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  products       CreatorCampaignProduct[]
+}
+
+model CreatorCampaignProduct {
+  id         String          @id @default(uuid()) @map("_id")
+  campaignId String
+  campaign   CreatorCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@unique([campaignId, productId])
+}
+
+model SubscriptionPlan {
+  id          String                    @id @default(uuid()) @map("_id")
+  name        String
+  description String
+  price       Float
+  interval    String                    // MONTHLY, QUARTERLY
+  isActive    Boolean                   @default(true)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+
+  products    SubscriptionPlanProduct[]
+  subscribers SubscriptionLifecycle[]
+}
+
+model SubscriptionPlanProduct {
+  id        String           @id @default(uuid()) @map("_id")
+  planId    String
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+
+  @@unique([planId, productId])
+}
+
+model SubscriptionLifecycle {
+  id           String             @id @default(uuid()) @map("_id")
+  userId       String
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId       String
+  plan         SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status       SubscriptionStatus @default(ACTIVE)
+  giftToName   String?            // Null if self, populated if gifted to someone
+  giftToEmail  String?
+  giftNote     String?
+  nextBilling  DateTime
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model ARSession {
+  id          String   @id @default(uuid()) @map("_id")
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  productType String   // Bracelet, earring, anklet
+  deviceType  String?
+  snapshotUrl String?  // Saved user photo try-on
+  createdAt   DateTime @default(now())
+}
+
+model Experiment {
+  id          String                 @id @default(uuid()) @map("_id")
+  name        String                 @unique // E.g., "AI_Stylist_Button_Color"
+  description String?
+  variations  Json                   // e.g. ["A", "B"]
+  isActive    Boolean                @default(false)
+  createdAt   DateTime               @default(now())
+
+  assignments ExperimentAssignment[]
+}
+
+model ExperimentAssignment {
+  id           String     @id @default(uuid()) @map("_id")
+  experimentId String
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  variation    String
+  converted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+
+  @@unique([experimentId, userId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // E.g. UPDATE_USER_ROLE, DELETE_PRODUCT
+  resource  String   // Table or entity identifier
+  payload   Json?    // Detailed changes
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  eventType String   // E.g. LOGIN_FAILED, RATE_LIMIT_EXCEEDED
+  ipAddress String
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model SavedDesign {
+  id                String   @id @default(uuid()) @map("_id")
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  productId         String
+  customizationData Json
+  createdAt         DateTime @default(now())
+}
+
+model Wishlist {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}

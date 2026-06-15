@@ -1,26 +1,723 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Celestial Deep Sky Palette */
+  --space-950: #02020a;
+  --space-900: #050518;
+  --space-800: #0b0c26;
+  --space-700: #12143b;
+  --space-600: #1a1e54;
+  --space-500: #292f7c;
+  --space-400: #4a53b3;
+
+  /* Shimmering Cosmic Gold */
+  --gold-50: #fffbeb;
+  --gold-100: #fef3c7;
+  --gold-200: #fde68a;
+  --gold-300: #fcd34d;
+  --gold-400: #fbbf24;
+  --gold-500: #f59e0b; /* Primary star starlight gold */
+  --gold-600: #d97706;
+  --gold-700: #b45309;
+  --gold-800: #78350f;
+  --gold-900: #451a03;
+
+  /* Nebula Purple & Celestial Violet */
+  --nebula-50: #faf5ff;
+  --nebula-100: #f3e8ff;
+  --nebula-200: #e9d5ff;
+  --nebula-300: #d8b4fe;
+  --nebula-400: #c084fc;
+  --nebula-500: #a855f7;
+  --nebula-600: #9333ea;
+  --nebula-700: #7e22ce;
+  --nebula-800: #6b21a8;
+  --nebula-900: #581c87;
+
+  /* Cosmic Teal / Starlight Cyan */
+  --teal-50: #ecfeff;
+  --teal-100: #cffafe;
+  --teal-200: #a5f3fc;
+  --teal-300: #67e8f9;
+  --teal-400: #22d3ee;
+  --teal-500: #06b6d4;
+  --teal-600: #0891b2;
+  --teal-700: #0e7490;
+  --teal-800: #155e75;
+  --teal-900: #164e63;
+
+  /* Standard Theme Aliases mapped to Dark Celestial */
+  --background: #04040e;
+  --foreground: #f8fafc;
+
+  --card: #0a0b23;
+  --card-foreground: #f8fafc;
+
+  --border: rgba(99, 102, 241, 0.2);
+  --input: rgba(99, 102, 241, 0.25);
+
+  --primary: #f59e0b;
+  --primary-foreground: #02020a;
+
+  --secondary: #a855f7;
+  --secondary-foreground: #ffffff;
+
+  --accent: #06b6d4;
+  --accent-foreground: #02020a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Keep it deep and celestial even in light preference to preserve astronomical theme integrity */
+    --background: #04040e;
+    --foreground: #f8fafc;
+    --card: #0a0b23;
+    --card-foreground: #f8fafc;
   }
 }
 
+@theme {
+  --color-space-950: var(--space-950);
+  --color-space-900: var(--space-900);
+  --color-space-800: var(--space-800);
+  --color-space-700: var(--space-700);
+  --color-space-600: var(--space-600);
+  --color-space-500: var(--space-500);
+  --color-space-400: var(--space-400);
+
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-gold-700: var(--gold-700);
+  --color-gold-800: var(--gold-800);
+  --color-gold-900: var(--gold-900);
+
+  --color-nebula-50: var(--nebula-50);
+  --color-nebula-100: var(--nebula-100);
+  --color-nebula-200: var(--nebula-200);
+  --color-nebula-300: var(--nebula-300);
+  --color-nebula-400: var(--nebula-400);
+  --color-nebula-500: var(--nebula-500);
+  --color-nebula-600: var(--nebula-600);
+  --color-nebula-700: var(--nebula-700);
+  --color-nebula-800: var(--nebula-800);
+  --color-nebula-900: var(--nebula-900);
+
+  --color-teal-50: var(--teal-50);
+  --color-teal-100: var(--teal-100);
+  --color-teal-200: var(--teal-200);
+  --color-teal-300: var(--teal-300);
+  --color-teal-400: var(--teal-400);
+  --color-teal-500: var(--teal-500);
+  --color-teal-600: var(--teal-600);
+  --color-teal-700: var(--teal-700);
+  --color-teal-800: var(--teal-800);
+  --color-teal-900: var(--teal-900);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+
+  --shadow-tactile: 0 4px 30px rgba(99, 102, 241, 0.15), 0 2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-tactile-dark: 0 4px 30px rgba(99, 102, 241, 0.15), 0 2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --radius-craft: 20px;
+  --radius-craft-sm: 10px;
+  --radius-craft-lg: 30px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--nebula-700);
+  color: #ffffff;
+}
+
+/* ─── Keyframe Animations ─────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 163, 39, 0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(212, 163, 39, 0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Utility Animation Classes ──────────────────── */
+.animate-fade-in     { animation: fade-in 0.4s ease forwards; }
+.animate-shimmer     { animation: shimmer 1.5s infinite; }
+.animate-spin-slow   { animation: spin-slow 8s linear infinite; }
+.animate-float       { animation: float 3s ease-in-out infinite; }
+.animate-pulse-glow  { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-slide-up    { animation: slide-up 0.5s ease forwards; }
+.animate-scale-in    { animation: scale-in 0.3s ease forwards; }
+
+/* ─── Astrological Textures ───────────────────────── */
+.cosmic-grain {
+  background-image: radial-gradient(rgba(212, 163, 39, 0.03) 1px, transparent 0),
+                    radial-gradient(rgba(212, 163, 39, 0.02) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.cosmic-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Gradient Text ───────────────────────────────── */
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--gold-500), var(--clay-500), var(--gold-400));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ─── Custom Scrollbar ────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+
+/* ─── Focus Styles ────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Dynamic Gradient Borders ────────────────────── */
+.border-gradient-gold {
+  border: 1px solid transparent;
+  background-image: linear-gradient(var(--card), var(--card)), linear-gradient(135deg, var(--gold-400), var(--nebula-500));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* ─── Glass Morphism ──────────────────────────────── */
+.glass {
+  background: rgba(10, 11, 35, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* ─── Trust Badge Row ─────────────────────────────── */
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--teal-300);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Product Card Hover Lift ─────────────────────── */
+.product-card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.25), 0 0 20px rgba(6, 182, 212, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+/* ─── Stepper ─────────────────────────────────────── */
+.step-line {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.4), transparent);
+}
+
+/* ─── Input base ──────────────────────────────────── */
+.input-base {
+  width: 100%;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-craft-sm);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  background: rgba(5, 5, 24, 0.6);
+  color: var(--foreground);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-base:focus {
+  outline: none;
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+}
+
+/* ─── Btn primary ─────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: var(--primary-foreground);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-craft-sm);
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-300));
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4), 0 0 12px rgba(6, 182, 212, 0.3);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Twinkling star animation utility */
+.twinkle-star {
+  animation: star-twinkle 3s ease-in-out infinite;
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Astrological dust / texture background effect */
+.cosmic-grain {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 0),
+                    radial-gradient(rgba(6, 182, 212, 0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+.cosmic-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.18;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Cosmic Arrow Animations ─────────────────────── */
+@keyframes cosmic-arrow-pulse {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.6;
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.3));
+  }
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+  }
+}
+
+@keyframes cosmic-arrow-trail {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scaleX(0.3);
+  }
+  30% {
+    opacity: 0.8;
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(30px) scaleX(0.5);
+  }
+}
+
+@keyframes warp-streak {
+  0% {
+    transform: translateY(100vh) scaleY(0.3);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scaleY(2);
+    opacity: 0;
+  }
+}
+
+@keyframes cosmic-float-depth {
+  0%, 100% {
+    transform: translateY(0) translateZ(0) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-8px) translateZ(10px) scale(1.02);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-4px) translateZ(20px) scale(1.05);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-10px) translateZ(10px) scale(1.02);
+    opacity: 0.85;
+  }
+}
+
+@keyframes nebula-drift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.1;
+  }
+  33% {
+    transform: translate(30px, -20px) rotate(3deg) scale(1.1);
+    opacity: 0.15;
+  }
+  66% {
+    transform: translate(-20px, 10px) rotate(-2deg) scale(0.95);
+    opacity: 0.12;
+  }
+}
+
+@keyframes star-birth {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0.8;
+    filter: blur(0);
+  }
+}
+
+@keyframes cosmic-path-flow {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.3;
+  }
+}
+
+@keyframes universe-walk {
+  0% {
+    transform: perspective(1000px) translateZ(0px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: perspective(1000px) translateZ(50px);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1000px) translateZ(100px);
+    opacity: 0;
+  }
+}
+
+/* ─── Utility classes for cosmic animations ───────── */
+.animate-cosmic-arrow  { animation: cosmic-arrow-pulse 2s ease-in-out infinite; }
+.animate-arrow-trail   { animation: cosmic-arrow-trail 1.5s ease infinite; }
+.animate-warp-streak   { animation: warp-streak 0.8s ease-out forwards; }
+.animate-depth-float   { animation: cosmic-float-depth 6s ease-in-out infinite; }
+.animate-nebula-drift  { animation: nebula-drift 20s ease-in-out infinite; }
+.animate-star-birth    { animation: star-birth 0.6s ease-out forwards; }
+.animate-path-flow     { animation: cosmic-path-flow 3s linear infinite; stroke-dasharray: 10 5; }
+.animate-universe-walk { animation: universe-walk 3s ease-in-out infinite; }
+
+/* ─── Cosmic Arrow Navigation Button ─────────────── */
+.cosmic-nav-arrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(168, 85, 247, 0.05));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--gold-400);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cosmic-nav-arrow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.cosmic-nav-arrow:hover::before {
+  transform: translateX(100%);
+}
+.cosmic-nav-arrow:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(212, 175, 55, 0.05);
+  transform: translateX(4px);
+}
+.cosmic-nav-arrow:active {
+  transform: scale(0.96);
+}
+
+/* ─── Product Card Cosmic Entry ───────────────────── */
+.cosmic-card-enter {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  animation: cosmic-card-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes cosmic-card-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Stagger children animation delay */
+.cosmic-stagger > :nth-child(1) { animation-delay: 0.05s; }
+.cosmic-stagger > :nth-child(2) { animation-delay: 0.1s; }
+.cosmic-stagger > :nth-child(3) { animation-delay: 0.15s; }
+.cosmic-stagger > :nth-child(4) { animation-delay: 0.2s; }
+.cosmic-stagger > :nth-child(5) { animation-delay: 0.25s; }
+.cosmic-stagger > :nth-child(6) { animation-delay: 0.3s; }
+.cosmic-stagger > :nth-child(7) { animation-delay: 0.35s; }
+.cosmic-stagger > :nth-child(8) { animation-delay: 0.4s; }
+.cosmic-stagger > :nth-child(9) { animation-delay: 0.45s; }
+.cosmic-stagger > :nth-child(10) { animation-delay: 0.5s; }
+.cosmic-stagger > :nth-child(11) { animation-delay: 0.55s; }
+.cosmic-stagger > :nth-child(12) { animation-delay: 0.6s; }
+
+/* ═══════════════════════════════════════════════════════
+   SCI-FI HUD & QUANTUM ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* HUD corner bracket pulse */
+@keyframes hud-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-hud-pulse {
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+/* HUD scanning line */
+@keyframes hud-scan {
+  0% { top: -2px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-hud-scan {
+  animation: hud-scan 3s ease-in-out infinite;
+}
+
+/* HUD sweep bar */
+@keyframes hud-sweep {
+  0% { left: -8px; }
+  100% { left: calc(100% + 8px); }
+}
+.animate-hud-sweep {
+  animation: hud-sweep 2.5s linear infinite;
+}
+
+/* Glitch shift effect */
+@keyframes glitch-shift {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  50% { transform: translateX(-1px); }
+  75% { transform: translateX(1px); }
+}
+.animate-glitch-shift {
+  animation: glitch-shift 0.3s ease-in-out infinite;
+}
+
+/* Glitch flicker */
+@keyframes glitch-flicker {
+  0%, 100% { opacity: 0; width: 2px; }
+  5% { opacity: 1; width: 3px; }
+  10% { opacity: 0; width: 1px; }
+  50% { opacity: 0; }
+  52% { opacity: 0.8; width: 4px; }
+  54% { opacity: 0; }
+}
+.animate-glitch-flicker {
+  animation: glitch-flicker 2s steps(1) infinite;
+}
+
+/* DNA Helix twist */
+@keyframes helix-twist-1 {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+}
+@keyframes helix-twist-2 {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-2px); }
+}
+.animate-helix-twist-1 {
+  animation: helix-twist-1 4s ease-in-out infinite;
+}
+.animate-helix-twist-2 {
+  animation: helix-twist-2 4s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Quantum shimmer for cards */
+@keyframes quantum-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.animate-quantum-shimmer {
+  background-size: 200% 100%;
+  animation: quantum-shimmer 3s linear infinite;
+}
+
+/* Singularity collapse */
+@keyframes singularity-collapse {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(0.95); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Dimensional threshold glow */
+@keyframes dimensional-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.1), inset 0 0 20px rgba(6, 182, 212, 0.05); }
+  50% { box-shadow: 0 0 40px rgba(6, 182, 212, 0.2), inset 0 0 40px rgba(6, 182, 212, 0.1); }
+}
+.animate-dimensional-glow {
+  animation: dimensional-glow 4s ease-in-out infinite;
+}
+
+/* Slow spinning for orbit elements */
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+/* Conic gradient support */
+.bg-gradient-conic {
+  background: conic-gradient(var(--tw-gradient-stops));
+}
+
+/* Radial gradient support */
+.bg-gradient-radial {
+  background: radial-gradient(var(--tw-gradient-stops));
+}
+
+/* Sci-fi text flicker */
+@keyframes scifi-flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.3; }
+  94% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+}
+.animate-scifi-flicker {
+  animation: scifi-flicker 4s steps(1) infinite;
+}
+
+/* Energy flow along path */
+@keyframes energy-flow {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.animate-energy-flow {
+  stroke-dasharray: 10 90;
+  animation: energy-flow 2s linear infinite;
+}
+
+/* Warp field distortion for containers */
+.warp-field {
+  position: relative;
+}
+.warp-field::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(6, 182, 212, 0.15) 60deg,
+    transparent 120deg,
+    rgba(168, 85, 247, 0.1) 180deg,
+    transparent 240deg,
+    rgba(212, 175, 55, 0.1) 300deg,
+    transparent 360deg
+  );
+  animation: spin 6s linear infinite;
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1px;
 }

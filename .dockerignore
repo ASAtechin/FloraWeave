@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+.git
+.env
+mobile
+.vscode
+.claude
+Dockerfile
+.dockerignore
+README.md
+*.webp
+*.jpeg
+*.jpg
+*.png
