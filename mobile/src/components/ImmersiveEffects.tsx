@@ -31,7 +31,7 @@ interface HolographicGlassCardProps {
   style?: ViewStyle;
   glowColor?: string;
   delay?: number;
-  variant?: 'gold' | 'purple' | 'cyan';
+  variant?: 'gold' | 'purple' | 'indigo';
 }
 
 export function HolographicGlassCard({
@@ -42,12 +42,11 @@ export function HolographicGlassCard({
   variant = 'gold',
 }: HolographicGlassCardProps) {
   const borderGlow = useSharedValue(0);
-  const scanLine = useSharedValue(-20);
 
   const colors = {
     gold: { border: 'rgba(212, 175, 55, 0.3)', glow: 'rgba(212, 175, 55, 0.1)' },
     purple: { border: 'rgba(168, 85, 247, 0.3)', glow: 'rgba(168, 85, 247, 0.1)' },
-    cyan: { border: 'rgba(6, 182, 212, 0.3)', glow: 'rgba(6, 182, 212, 0.1)' },
+    indigo: { border: 'rgba(99, 102, 241, 0.35)', glow: 'rgba(99, 102, 241, 0.1)' },
   };
 
   useEffect(() => {
@@ -55,31 +54,18 @@ export function HolographicGlassCard({
       delay,
       withRepeat(
         withSequence(
-          withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.3, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
         ),
         -1,
         true
       )
     );
-    scanLine.value = withDelay(
-      delay + 500,
-      withRepeat(
-        withTiming(SCREEN_WIDTH, { duration: 3000, easing: Easing.linear }),
-        -1,
-        false
-      )
-    );
   }, [delay]);
 
   const glowStyle = useAnimatedStyle(() => ({
-    shadowOpacity: interpolate(borderGlow.value, [0, 1], [0.1, 0.4]),
-    shadowRadius: interpolate(borderGlow.value, [0, 1], [8, 20]),
-  }));
-
-  const scanStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: scanLine.value }],
-    opacity: 0.15,
+    shadowOpacity: interpolate(borderGlow.value, [0, 1], [0.15, 0.45]),
+    shadowRadius: interpolate(borderGlow.value, [0, 1], [10, 24]),
   }));
 
   return (
@@ -89,9 +75,6 @@ export function HolographicGlassCard({
     >
       {/* Holographic border */}
       <View style={[styles.holoCardBorder, { borderColor: colors[variant].border }]}>
-        {/* Scan line effect */}
-        <Animated.View style={[styles.scanLine, scanStyle]} />
-
         {/* Content */}
         <View style={styles.holoCardContent}>{children}</View>
 
@@ -99,6 +82,38 @@ export function HolographicGlassCard({
         <View style={[styles.bottomGlow, { backgroundColor: colors[variant].glow }]} />
       </View>
     </Animated.View>
+  );
+}
+
+/**
+ * ScalePressable — Wraps touch targets with a tactile springy scaling effect.
+ */
+interface ScalePressableProps {
+  children: React.ReactNode;
+  onPress?: () => void;
+  style?: any;
+  activeScale?: number;
+}
+
+export function ScalePressable({ children, onPress, style, activeScale = 0.96 }: ScalePressableProps) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withSpring(activeScale, { damping: 10, stiffness: 150 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 10, stiffness: 150 });
+      }}
+      style={style}
+    >
+      <Animated.View style={animatedStyle}>{children}</Animated.View>
+    </Pressable>
   );
 }
 
@@ -373,14 +388,6 @@ const styles = StyleSheet.create({
   holoCardContent: {
     position: 'relative',
     zIndex: 2,
-  },
-  scanLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 60,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
-    zIndex: 1,
   },
   bottomGlow: {
     position: 'absolute',

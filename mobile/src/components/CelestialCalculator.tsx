@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, Pressable, ActivityIndicator, Platform } from 'react-native';
 import { Sparkles, Flame, Mountain, Wind, Droplets, ArrowRight } from 'lucide-react-native';
+import Animated, { FadeInDown, FadeOut, useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import GlassCard from './GlassCard';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface ElementInfo {
   name: string;
@@ -63,6 +66,10 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
   const [isCalculated, setIsCalculated] = useState(false);
   const [calculating, setCalculating] = useState(false);
 
+  // Focus states for text inputs
+  const [nameFocused, setNameFocused] = useState(false);
+  const [dateFocused, setDateFocused] = useState(false);
+
   const handleCalculate = () => {
     if (!name.trim()) return;
     setCalculating(true);
@@ -74,10 +81,101 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
 
   const selectedData = ELEMENT_DATA[element];
 
+  // Helper animated components
+  const ElementButton = ({ el, isActive, onPress }: { el: any; isActive: boolean; onPress: () => void }) => {
+    const scale = useSharedValue(1);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+      borderColor: withTiming(isActive ? el.color : 'rgba(255,255,255,0.08)', { duration: 250 }),
+      backgroundColor: withTiming(isActive ? `${el.color}15` : 'rgba(255,255,255,0)', { duration: 250 }),
+    }));
+
+    const Icon = el.icon;
+
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        style={[styles.elementButton, animatedStyle]}
+      >
+        <Icon size={20} color={el.color} style={styles.elementIcon} />
+        <Text style={[styles.elementText, { color: isActive ? el.color : '#a8a29e' }]}>
+          {el.name}
+        </Text>
+      </AnimatedPressable>
+    );
+  };
+
+  const CalcSubmitButton = ({ onPress, disabled, calculating, text, icon: ButtonIcon }: any) => {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        disabled={disabled}
+        style={[styles.button, disabled && styles.disabledButton, animatedStyle]}
+      >
+        {calculating ? (
+          <ActivityIndicator color="#090514" />
+        ) : (
+          <>
+            <Text style={styles.buttonText}>{text}</Text>
+            {ButtonIcon && <ButtonIcon size={14} color="#090514" />}
+          </>
+        )}
+      </AnimatedPressable>
+    );
+  };
+
+  const RecalcBtn = ({ onPress }: any) => {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        style={[styles.recalcButton, animatedStyle]}
+      >
+        <Text style={styles.recalcButtonText}>Recalculate</Text>
+      </AnimatedPressable>
+    );
+  };
+
+  const ApplyBtn = ({ onPress, text, icon: ButtonIcon }: any) => {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        style={[styles.actionBtn, animatedStyle]}
+      >
+        <Text style={styles.actionBtnText}>{text}</Text>
+        {ButtonIcon && <ButtonIcon size={14} color="#090514" />}
+      </AnimatedPressable>
+    );
+  };
+
   return (
     <GlassCard style={styles.cardContainer}>
       {!isCalculated ? (
-        <View style={styles.formContainer}>
+        <Animated.View 
+          entering={FadeInDown.duration(450)} 
+          exiting={FadeOut.duration(200)}
+          style={styles.formContainer}
+        >
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.badge}>
@@ -95,9 +193,14 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Your Name</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  nameFocused && { borderColor: '#d4af37' }
+                ]}
                 value={name}
                 onChangeText={setName}
+                onFocus={() => setNameFocused(true)}
+                onBlur={() => setNameFocused(false)}
                 placeholder="e.g. Luna Devi"
                 placeholderTextColor="rgba(255,255,255,0.3)"
               />
@@ -105,9 +208,14 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Birth Date (DD/MM/YYYY)</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  dateFocused && { borderColor: '#d4af37' }
+                ]}
                 value={birthDate}
                 onChangeText={setBirthDate}
+                onFocus={() => setDateFocused(true)}
+                onBlur={() => setDateFocused(false)}
                 placeholder="e.g. 15/08/1999"
                 placeholderTextColor="rgba(255,255,255,0.3)"
               />
@@ -123,47 +231,32 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
                 { name: 'Earth', icon: Mountain, color: '#10b981' },
                 { name: 'Air', icon: Wind, color: '#a855f7' },
                 { name: 'Water', icon: Droplets, color: '#06b6d4' },
-              ].map((el) => {
-                const Icon = el.icon;
-                const isActive = element === el.name;
-                return (
-                  <Pressable
-                    key={el.name}
-                    onPress={() => setElement(el.name)}
-                    style={[
-                      styles.elementButton,
-                      { borderColor: isActive ? el.color : 'rgba(255,255,255,0.08)' },
-                      isActive && { backgroundColor: `${el.color}15` },
-                    ]}
-                  >
-                    <Icon size={20} color={el.color} style={styles.elementIcon} />
-                    <Text style={[styles.elementText, { color: isActive ? el.color : '#a8a29e' }]}>
-                      {el.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+              ].map((el) => (
+                <ElementButton
+                  key={el.name}
+                  el={el}
+                  isActive={element === el.name}
+                  onPress={() => setElement(el.name)}
+                />
+              ))}
             </View>
           </View>
 
           {/* Submit Button */}
-          <Pressable
+          <CalcSubmitButton
             onPress={handleCalculate}
             disabled={calculating || !name.trim()}
-            style={[styles.button, (!name.trim() || calculating) && styles.disabledButton]}
-          >
-            {calculating ? (
-              <ActivityIndicator color="#090514" />
-            ) : (
-              <>
-                <Text style={styles.buttonText}>Chart My Intentions</Text>
-                <Sparkles size={14} color="#090514" />
-              </>
-            )}
-          </Pressable>
-        </View>
+            calculating={calculating}
+            text="Chart My Intentions"
+            icon={Sparkles}
+          />
+        </Animated.View>
       ) : (
-        <View style={styles.resultsContainer}>
+        <Animated.View 
+          entering={FadeInDown.duration(450)} 
+          exiting={FadeOut.duration(200)}
+          style={styles.resultsContainer}
+        >
           {/* Aura Visualization */}
           <View style={styles.auraWrapper}>
             <View
@@ -217,18 +310,14 @@ export default function CelestialCalculator({ onCustomizeWithAlignment }: Celest
 
           {/* Action Row */}
           <View style={styles.actionRow}>
-            <Pressable onPress={() => setIsCalculated(false)} style={styles.recalcButton}>
-              <Text style={styles.recalcButtonText}>Recalculate</Text>
-            </Pressable>
-            <Pressable
+            <RecalcBtn onPress={() => setIsCalculated(false)} />
+            <ApplyBtn
               onPress={() => onCustomizeWithAlignment(selectedData.thread, element)}
-              style={styles.actionBtn}
-            >
-              <Text style={styles.actionBtnText}>Apply to Custom Shop</Text>
-              <ArrowRight size={14} color="#090514" />
-            </Pressable>
+              text="Apply to Custom Shop"
+              icon={ArrowRight}
+            />
           </View>
-        </View>
+        </Animated.View>
       )}
     </GlassCard>
   );

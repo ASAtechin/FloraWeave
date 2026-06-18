@@ -5,6 +5,7 @@ import { useStore, CustomizationData } from '../store/useStore';
 import { Product } from '../lib/api';
 import AICustomizer from './AICustomizer';
 import GlassCard from './GlassCard';
+import { ScalePressable } from './ImmersiveEffects';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -201,7 +202,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                     {config.materials.map((mat: string) => {
                       const isActive = metalFinish === mat;
                       return (
-                        <Pressable
+                        <ScalePressable
                           key={mat}
                           onPress={() => setMetalFinish(mat)}
                           style={[styles.pillBtn, isActive && styles.pillBtnActive]}
@@ -209,7 +210,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                           <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                             {mat}
                           </Text>
-                        </Pressable>
+                        </ScalePressable>
                       );
                     })}
                   </View>
@@ -224,7 +225,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                     {config.sizes.map((sz: string) => {
                       const isActive = size === sz;
                       return (
-                        <Pressable
+                        <ScalePressable
                           key={sz}
                           onPress={() => setSize(sz)}
                           style={[styles.sizeBtn, isActive && styles.sizeBtnActive]}
@@ -232,7 +233,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                           <Text style={[styles.sizeText, isActive && styles.sizeTextActive]}>
                             {sz}
                           </Text>
-                        </Pressable>
+                        </ScalePressable>
                       );
                     })}
                   </View>
@@ -247,7 +248,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                     {config.charms.map((ch: string) => {
                       const isActive = charm === ch;
                       return (
-                        <Pressable
+                        <ScalePressable
                           key={ch}
                           onPress={() => setCharm(ch)}
                           style={[styles.pillBtn, isActive && styles.pillBtnActive]}
@@ -255,7 +256,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                           <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                             {ch}
                           </Text>
-                        </Pressable>
+                        </ScalePressable>
                       );
                     })}
                   </View>
@@ -286,7 +287,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                   ].map((pkg) => {
                     const isActive = packaging === pkg;
                     return (
-                      <Pressable
+                      <ScalePressable
                         key={pkg}
                         onPress={() => setPackaging(pkg)}
                         style={[styles.pillBtn, isActive && styles.pillBtnActive, { flex: 1 }]}
@@ -294,7 +295,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                         <Text style={[styles.pillText, isActive && styles.pillTextActive, { textAlign: 'center' }]}>
                           {pkg.includes('Keepsake') ? 'Wooden Keepsake Box' : 'Kraft Envelope'}
                         </Text>
-                      </Pressable>
+                      </ScalePressable>
                     );
                   })}
                 </View>
@@ -310,7 +311,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                   ].map((opt) => {
                     const isActive = madeFor === opt.value;
                     return (
-                      <Pressable
+                      <ScalePressable
                         key={opt.value}
                         onPress={() => setMadeFor(opt.value as any)}
                         style={[styles.pillBtn, isActive && styles.pillBtnActive, { flex: 1 }]}
@@ -318,7 +319,7 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
                         <Text style={[styles.pillText, isActive && styles.pillTextActive, { textAlign: 'center' }]}>
                           {opt.label}
                         </Text>
-                      </Pressable>
+                      </ScalePressable>
                     );
                   })}
                 </View>
@@ -343,15 +344,15 @@ export default function ProductDetailsModal({ product, visible, onClose }: Produ
 
             {/* Bottom Actions Block */}
             <View style={styles.actionsBar}>
-              <Pressable onPress={handleSaveDesign} style={styles.secondaryActionBtn}>
+              <ScalePressable onPress={handleSaveDesign} style={styles.secondaryActionBtn}>
                 <Heart size={18} color="#ffffff" />
                 <Text style={styles.secActionText}>Save Design</Text>
-              </Pressable>
+              </ScalePressable>
               
-              <Pressable onPress={handleAddToCart} style={styles.primaryActionBtn}>
+              <ScalePressable onPress={handleAddToCart} style={styles.primaryActionBtn}>
                 <ShoppingBag size={18} color="#090514" />
                 <Text style={styles.primActionText}>Add to Basket</Text>
-              </Pressable>
+              </ScalePressable>
             </View>
           </View>
         </KeyboardAvoidingView>

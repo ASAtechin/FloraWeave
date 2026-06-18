@@ -9,8 +9,7 @@ import GlassCard from '@/components/GlassCard';
 import ProductDetailsModal from '@/components/ProductDetailsModal';
 import CartOverlay from '@/components/CartOverlay';
 import { AnimatedStarField } from '@/components/CosmicAnimations';
-import { HolographicGlassCard, NeonGlowText, CinematicSection } from '@/components/ImmersiveEffects';
-import { SciFiHUDOverlay, DataMatrixRain } from '@/components/SciFiEffects';
+import { HolographicGlassCard, NeonGlowText, CinematicSection, ScalePressable } from '@/components/ImmersiveEffects';
 import { fetchProducts, Product, MOCK_PRODUCTS } from '@/lib/api';
 
 const ZODIAC_SIGNS = [
@@ -77,8 +76,6 @@ export default function ShopScreen() {
 
   return (
     <CosmicBackground style={styles.container} intensity="active">
-      <SciFiHUDOverlay />
-      <DataMatrixRain intensity="light" />
       <SafeAreaView style={styles.safeArea}>
         <Header onCartPress={() => setCartVisible(true)} />
 
@@ -108,7 +105,7 @@ export default function ShopScreen() {
             {CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat.slug;
               return (
-                <Pressable
+                <ScalePressable
                   key={cat.slug}
                   onPress={() => setSelectedCategory(cat.slug)}
                   style={[styles.pillBtn, isActive && styles.pillBtnActive]}
@@ -116,7 +113,7 @@ export default function ShopScreen() {
                   <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                     {cat.name}
                   </Text>
-                </Pressable>
+                </ScalePressable>
               );
             })}
           </ScrollView>
@@ -131,7 +128,7 @@ export default function ShopScreen() {
             {ZODIAC_SIGNS.map((zod) => {
               const isActive = selectedZodiac === zod;
               return (
-                <Pressable
+                <ScalePressable
                   key={zod}
                   onPress={() => setSelectedZodiac(zod)}
                   style={[styles.zodBtn, isActive && styles.zodBtnActive]}
@@ -139,7 +136,7 @@ export default function ShopScreen() {
                   <Text style={[styles.zodText, isActive && styles.zodTextActive]}>
                     {zod}
                   </Text>
-                </Pressable>
+                </ScalePressable>
               );
             })}
           </ScrollView>
@@ -167,10 +164,10 @@ export default function ShopScreen() {
                 entering={FadeInDown.delay(index * 80).duration(500).springify().damping(15)}
                 style={styles.gridItem}
               >
-                <Pressable onPress={() => openDetails(item)}>
+                <ScalePressable onPress={() => openDetails(item)} style={{ flex: 1 }}>
                   <HolographicGlassCard 
                     delay={100 + index * 100} 
-                    variant={(['gold', 'purple', 'cyan'] as const)[index % 3]}
+                    variant={(['gold', 'purple', 'indigo'] as const)[index % 3]}
                   >
                     <View style={styles.prodCard}>
                       <Image source={{ uri: item.imageUrl }} style={styles.prodImg} />
@@ -190,7 +187,7 @@ export default function ShopScreen() {
                       </View>
                     </View>
                   </HolographicGlassCard>
-                </Pressable>
+                </ScalePressable>
               </Animated.View>
             )}
           />

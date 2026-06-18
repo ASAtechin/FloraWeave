@@ -9,8 +9,7 @@ import GlassCard from '@/components/GlassCard';
 import CelestialCalculator from '@/components/CelestialCalculator';
 import ProductDetailsModal from '@/components/ProductDetailsModal';
 import CartOverlay from '@/components/CartOverlay';
-import { HolographicGlassCard, NeonGlowText, CinematicSection } from '@/components/ImmersiveEffects';
-import { SciFiHUDOverlay, DataMatrixRain } from '@/components/SciFiEffects';
+import { HolographicGlassCard, NeonGlowText, CinematicSection, ScalePressable } from '@/components/ImmersiveEffects';
 import { fetchProducts, Product, MOCK_PRODUCTS } from '@/lib/api';
 import { useStore } from '@/store/useStore';
 
@@ -64,11 +63,6 @@ export default function HomeScreen() {
 
   return (
     <CosmicBackground style={styles.container} intensity="active">
-      {/* Sci-Fi HUD Chrome */}
-      <SciFiHUDOverlay />
-      {/* Subtle matrix rain in background */}
-      <DataMatrixRain intensity="light" />
-      
       <SafeAreaView style={styles.safeArea}>
         <Header onCartPress={() => setCartVisible(true)} />
 
@@ -119,7 +113,7 @@ export default function HomeScreen() {
           ) : (
             <View style={styles.featuredGrid}>
               {products.slice(0, 2).map((prod, i) => (
-                <Pressable key={prod.id} onPress={() => openDetails(prod)}>
+                <ScalePressable key={prod.id} onPress={() => openDetails(prod)} style={{ flex: 1 }}>
                   <HolographicGlassCard delay={200 + i * 150} variant={i === 0 ? 'gold' : 'purple'}>
                     <View style={styles.prodCard}>
                       <Image source={{ uri: prod.imageUrl }} style={styles.prodImg} />
@@ -133,7 +127,7 @@ export default function HomeScreen() {
                       </View>
                     </View>
                   </HolographicGlassCard>
-                </Pressable>
+                </ScalePressable>
               ))}
             </View>
           )}
@@ -169,7 +163,7 @@ export default function HomeScreen() {
 
           {/* Artisan collective spotlight */}
           <CinematicSection delay={800} direction="up">
-            <HolographicGlassCard delay={900} variant="cyan">
+            <HolographicGlassCard delay={900} variant="indigo">
               <View style={styles.artisanCard}>
                 <View style={styles.artisanHeader}>
                   <View style={styles.artisanIcon}>

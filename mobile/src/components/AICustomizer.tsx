@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
-import { Sparkles, Check, HelpCircle } from 'lucide-react-native';
+import { Sparkles, Check } from 'lucide-react-native';
+import Animated, { FadeInDown, FadeOut, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { customizeProductWithAI } from '../lib/api';
 import GlassCard from './GlassCard';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface AICustomizerProps {
   productTitle: string;
@@ -20,6 +23,9 @@ export default function AICustomizer({
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+
+  // Focus state for prompt input
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleAISubmit = async () => {
     if (!prompt.trim()) return;
@@ -49,6 +55,47 @@ export default function AICustomizer({
     setResult(null);
   };
 
+  // Animated press handlers
+  const SubmitBtn = () => {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+    return (
+      <AnimatedPressable
+        onPress={handleAISubmit}
+        onPressIn={() => { scale.value = withSpring(0.92, { damping: 10 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 10 }); }}
+        disabled={loading || !prompt.trim()}
+        style={[styles.submitBtn, (!prompt.trim() || loading) && styles.disabledBtn, animatedStyle]}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#090514" />
+        ) : (
+          <Sparkles size={14} color="#090514" />
+        )}
+      </AnimatedPressable>
+    );
+  };
+
+  const ApplyBtn = () => {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+    return (
+      <AnimatedPressable
+        onPress={handleApply}
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        style={[styles.applyBtn, animatedStyle]}
+      >
+        <Text style={styles.applyBtnText}>Apply Selected Configuration</Text>
+        <Check size={14} color="#090514" />
+      </AnimatedPressable>
+    );
+  };
+
   return (
     <GlassCard style={styles.container} borderType="gold">
       <View style={styles.header}>
@@ -62,31 +109,30 @@ export default function AICustomizer({
       {/* Input */}
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            isFocused && { borderColor: '#d4af37' }
+          ]}
           value={prompt}
           onChangeText={setPrompt}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder="e.g. A Scorpio bracelet focused on healing and calm water energy"
           placeholderTextColor="rgba(255, 255, 255, 0.35)"
           multiline
           numberOfLines={2}
           maxLength={150}
         />
-        <Pressable
-          onPress={handleAISubmit}
-          disabled={loading || !prompt.trim()}
-          style={[styles.submitBtn, (!prompt.trim() || loading) && styles.disabledBtn]}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#090514" />
-          ) : (
-            <Sparkles size={14} color="#090514" />
-          )}
-        </Pressable>
+        <SubmitBtn />
       </View>
 
       {/* Results View */}
       {result && (
-        <View style={styles.resultContainer}>
+        <Animated.View 
+          entering={FadeInDown.duration(450)} 
+          exiting={FadeOut.duration(200)}
+          style={styles.resultContainer}
+        >
           <Text style={styles.resultHeading}>AI Selected Alignment</Text>
           
           <View style={styles.resultGrid}>
@@ -126,11 +172,8 @@ export default function AICustomizer({
             </View>
           ) : null}
 
-          <Pressable onPress={handleApply} style={styles.applyBtn}>
-            <Text style={styles.applyBtnText}>Apply Selected Configuration</Text>
-            <Check size={14} color="#090514" />
-          </Pressable>
-        </View>
+          <ApplyBtn />
+        </Animated.View>
       )}
     </GlassCard>
   );

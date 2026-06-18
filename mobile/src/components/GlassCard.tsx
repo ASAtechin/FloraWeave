@@ -17,7 +17,7 @@ export default function GlassCard({
 }: GlassCardProps) {
   const borderStyle = borderType === 'gold' ? styles.goldBorder : styles.mutedBorder;
 
-  if (Platform.OS === 'ios') {
+  if (Platform.OS !== 'android') {
     return (
       <BlurView
         intensity={intensity}
